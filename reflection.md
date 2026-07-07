@@ -2,10 +2,22 @@
 
 ## 1. System Design
 
+User actions:
+- Add a pet
+- Schedule food and med times
+- See a daily plan
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+
+owner
+- pets that they own
+pet
+- be connected to their owners
+- meds that they need
+task
 
 **b. Design changes**
 
