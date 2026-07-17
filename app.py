@@ -103,33 +103,120 @@ else:
 
 st.divider()
 
-# Schedule Generation Section
-st.subheader("📅 Daily Schedule")
+# Schedule Generation & Analysis Section (Phase 3)
+st.subheader("📅 Schedule & Analytics")
 
-if st.button("Generate daily schedule", key="gen_schedule_btn"):
-    if owner.pets and owner.get_all_tasks():
-        st.markdown("**Generated Schedule:**")
+if owner.pets and owner.get_all_tasks():
+    # Create tabs for different views
+    tab1, tab2, tab3, tab4 = st.tabs(["Daily Schedule", "Filter & Sort", "Conflicts", "Summary"])
+
+    with tab1:
+        st.markdown("**Daily Schedule (sorted by time):**")
         daily_tasks = scheduler.get_daily_plan()
-        for task in daily_tasks:
-            status_icon = "✓" if task.is_completed else "○"
-            st.write(f"{status_icon} {task.description} ({task.task_type}) @ {task.scheduled_time.strftime('%H:%M')} — {task.pet.name}")
-    elif not owner.pets:
-        st.warning("Add pets to generate a schedule.")
-    else:
-        st.warning("Add tasks to generate a schedule.")
 
-st.divider()
+        if daily_tasks:
+            schedule_data = []
+            for task in daily_tasks:
+                schedule_data.append({
+                    "Pet": task.pet.name,
+                    "Time": task.scheduled_time.strftime('%H:%M'),
+                    "Description": task.description,
+                    "Type": task.task_type,
+                    "Frequency": task.frequency,
+                    "Status": "✓ Complete" if task.is_completed else "○ Pending"
+                })
+            st.table(schedule_data)
+        else:
+            st.info("No tasks scheduled yet.")
 
-# Pending tasks summary
-if owner.get_all_pending_tasks():
-    st.markdown("**Pending tasks summary:**")
-    pending = scheduler.get_pending_tasks()
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total pending", len(pending))
-    with col2:
-        food_tasks = len([t for t in pending if t.task_type == "food"])
-        st.metric("Feeding tasks", food_tasks)
-    with col3:
-        med_tasks = len([t for t in pending if t.task_type == "medicine"])
-        st.metric("Medicine tasks", med_tasks)
+    with tab2:
+        st.markdown("**Filter & Sort Tasks**")
+
+        filter_col1, filter_col2 = st.columns(2)
+        with filter_col1:
+            filter_type = st.selectbox("Filter by task type:",
+                                      ["All"] + list(set(t.task_type for t in owner.get_all_tasks())))
+        with filter_col2:
+            filter_status = st.selectbox("Filter by status:",
+                                        ["All", "Pending", "Completed"])
+
+        # Apply filters using Scheduler methods
+        filtered_tasks = owner.get_all_tasks()
+
+        if filter_type != "All":
+            filtered_tasks = scheduler.get_tasks_by_type(filter_type)
+
+        if filter_status == "Pending":
+            filtered_tasks = [t for t in filtered_tasks if not t.is_completed]
+        elif filter_status == "Completed":
+            filtered_tasks = [t for t in filtered_tasks if t.is_completed]
+
+        # Sort by time
+        filtered_tasks = sorted(filtered_tasks, key=lambda t: t.scheduled_time)
+
+        if filtered_tasks:
+            filter_data = []
+            for task in filtered_tasks:
+                filter_data.append({
+                    "Pet": task.pet.name,
+                    "Time": task.scheduled_time.strftime('%H:%M'),
+                    "Description": task.description,
+                    "Type": task.task_type,
+                    "Status": "✓ Complete" if task.is_completed else "○ Pending"
+                })
+            st.table(filter_data)
+            st.caption(f"Showing {len(filtered_tasks)} task(s)")
+        else:
+            st.info("No tasks match the selected filters.")
+
+    with tab3:
+        st.markdown("**Conflict Detection**")
+        conflicts = scheduler.get_all_scheduling_conflicts()
+
+        if conflicts:
+            st.warning("⚠️ Scheduling conflicts detected!")
+            for conflict in conflicts:
+                st.warning(conflict, icon="⚠️")
+        else:
+            st.success("✓ No scheduling conflicts! Your schedule is optimized.", icon="✅")
+
+    with tab4:
+        st.markdown("**Schedule Summary**")
+        pending = scheduler.get_pending_tasks()
+        completed = scheduler.get_tasks_by_completion_status(True)
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Tasks", len(owner.get_all_tasks()))
+        with col2:
+            st.metric("Pending", len(pending))
+        with col3:
+            st.metric("Completed", len(completed))
+
+        st.divider()
+
+        # Breakdown by task type
+        st.markdown("**Tasks by Type:**")
+        task_types = set(t.task_type for t in owner.get_all_tasks())
+        type_cols = st.columns(len(task_types))
+
+        for i, task_type in enumerate(sorted(task_types)):
+            type_count = len(scheduler.get_tasks_by_type(task_type))
+            with type_cols[i]:
+                st.metric(task_type.capitalize(), type_count)
+
+        st.divider()
+
+        # Breakdown by pet
+        st.markdown("**Tasks by Pet:**")
+        pet_cols = st.columns(len(owner.pets))
+
+        for i, pet in enumerate(owner.pets):
+            pet_task_count = len(pet.get_tasks())
+            with pet_cols[i]:
+                st.metric(pet.name, pet_task_count)
+
+elif not owner.pets:
+    st.warning("📍 Add a pet first before creating tasks.")
+else:
+    st.info("📍 Add tasks to see your schedule and analytics.")

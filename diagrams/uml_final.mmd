@@ -1,0 +1,56 @@
+classDiagram
+    class Owner {
+        +String name
+        +List~Pet~ pets
+        +add_pet(Pet pet) void
+        +get_all_tasks() List~Task~
+        +get_all_pending_tasks() List~Task~
+        +add_task(Scheduler scheduler, Task task) void
+        +perform_action(Pet pet, String action) void
+    }
+
+    class Pet {
+        +String name
+        +Owner owner
+        +List~String~ meds
+        +List~Task~ tasks
+        +add_task(Task task) void
+        +get_tasks() List~Task~
+        +get_pending_tasks() List~Task~
+        +get_meds() List~String~
+        +add_med(String medication) void
+    }
+
+    class Task {
+        +String description
+        +Pet pet
+        +String task_type
+        +time scheduled_time
+        +String frequency
+        +bool is_completed
+        +Owner owner
+        +mark_complete() void
+        +mark_incomplete() void
+        +__str__() String
+    }
+
+    class Scheduler {
+        +Owner owner
+        +add_task(Task task) void
+        +get_daily_plan(Pet pet) List~Task~
+        +get_pending_tasks(Pet pet) List~Task~
+        +get_tasks_by_type(String type, Pet pet) List~Task~
+        +get_tasks_by_completion_status(bool status, Pet pet) List~Task~
+        +get_tasks_by_pet_name(String name) List~Task~
+        +detect_task_conflicts(Task task) List~String~
+        +get_all_scheduling_conflicts() List~String~
+        +complete_task(Task task) void
+        +print_daily_plan(Pet pet) void
+    }
+
+    Owner "1" --> "many" Pet : owns
+    Pet "1" --> "1" Owner : belongs to
+    Pet "1" o-- "many" Task : contains
+    Task "many" --> "1" Pet : associated with
+    Task "many" --> "1" Owner : associated with
+    Scheduler "1" --> "1" Owner : manages
