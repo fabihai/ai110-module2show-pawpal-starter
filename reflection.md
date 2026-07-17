@@ -12,25 +12,7 @@ User actions:
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
-owner
-- attributes:
-- - pets that they own
-- methods
-- - can performs actions on the pet
-- - can add tasks to scheduler
-- 1 owner to many pets
-pet
-- attributes:
-- - contains owner information
-- - meds that they need
-- 1 pet to 1 owner
-task
-- attributes
-- - should be associated with a particular owner and pet
-scheduler
-- attributes
-- - must hold individual tasks
-- - should be associated with a particular pet
+    The classes that I chose are Owner, Pet, Task, and Scheduler. The Owner can add Pets, perform actions on the Pet, and can add tasks to the Scheduler. The Pet can have meds added to their plan and is connected with one owner. Each Task is associated with an Owner and a Pet. The Scheduler must hold a list of Tasks and is associated with a specific Pet. The Scheduler can have Tasks added to it and can have a daily plan retrieved from it.
 
 **b. Design changes**
 
