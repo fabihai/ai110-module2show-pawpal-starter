@@ -64,26 +64,44 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 
 ```bash
 # Run the full test suite:
-pytest
+pytest -m pytest
 
 # Run with coverage:
 pytest --cov
 ```
 
+These tests cover a variety of cases across the following categories:
+- sortng edge cases
+- recurring task logic
+- conflict detection
+- state & validity
+- queries on empty/missing data
+
 Sample test output:
 
 ```
 # Paste your pytest output here
+======================================================= test session starts ========================================================
+platform win32 -- Python 3.13.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: ############ (project root directory)
+plugins: anyio-4.13.0
+collected 17 items                                                                                                                  
+
+tests\test_pawpal.py .................                                                                                        [100%]
+
+======================================================== 17 passed in 0.12s ========================================================
 ```
+
+Based on the above test results, the system's reliability is 5 stars.
 
 ## 📐 Smarter Scheduling
 
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | `get_daily_plan()` | Sorts tasks by scheduled time using lambda: `key=lambda t: t.scheduled_time` |
-| Filtering | `get_tasks_by_completion_status()`, `get_tasks_by_pet_name()`, `get_tasks_by_type()`, `get_pending_tasks()` | Filter by completion status (completed/pending), pet name, task type (food/medicine/play), or only incomplete tasks |
-| Conflict handling | `detect_task_conflicts()`, `get_all_scheduling_conflicts()` | Lightweight detection returns warning messages for exact time matches; [CONFLICT] for same-pet overlaps, [ALERT] for different-pet overlaps |
-| Recurring tasks | `complete_task()` | Marks task complete and auto-creates next occurrence for daily/weekly tasks; one-time tasks do not recur |
+| Sorting behavior | `get_daily_plan()` | Sorts tasks by scheduled time using lambda: `key=lambda t: t.scheduled_time` |
+| Filtering behavior | `get_tasks_by_completion_status()`, `get_tasks_by_pet_name()`, `get_tasks_by_type()`, `get_pending_tasks()` | Filter by completion status (completed/pending), pet name, task type (food/medicine/play), or only incomplete tasks |
+| Conflict detection logic | `detect_task_conflicts()`, `get_all_scheduling_conflicts()` | Lightweight detection returns warning messages for exact time matches; [CONFLICT] for same-pet overlaps, [ALERT] for different-pet overlaps |
+| Recurring task logic| `complete_task()` | Marks task complete and auto-creates next occurrence for daily/weekly tasks; one-time tasks do not recur |
 
 ## 📸 Demo Walkthrough
 
