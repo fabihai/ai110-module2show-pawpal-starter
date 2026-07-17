@@ -13,11 +13,24 @@ User actions:
 - What classes did you include, and what responsibilities did you assign to each?
 
 owner
-- pets that they own
+- attributes:
+- - pets that they own
+- methods
+- - can performs actions on the pet
+- - can add tasks to scheduler
+- 1 owner to many pets
 pet
-- be connected to their owners
-- meds that they need
+- attributes:
+- - contains owner information
+- - meds that they need
+- 1 pet to 1 owner
 task
+- attributes
+- - should be associated with a particular owner and pet
+scheduler
+- attributes
+- - must hold individual tasks
+- - should be associated with a particular pet
 
 **b. Design changes**
 

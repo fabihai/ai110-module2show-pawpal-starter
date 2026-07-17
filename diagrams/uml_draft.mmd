@@ -1,0 +1,36 @@
+classDiagram
+    class Owner {
+        +String name
+        +List~Pet~ pets
+        +addPet(Pet pet) void
+        +performAction(Pet pet, String action) void
+        +addTask(Scheduler scheduler, Task task) void
+    }
+
+    class Pet {
+        +String name
+        +Owner owner
+        +List~String~ meds
+        +getMeds() List~String~
+    }
+
+    class Task {
+        +Owner owner
+        +Pet pet
+        +String type
+        +DateTime time
+    }
+
+    class Scheduler {
+        +Pet pet
+        +List~Task~ tasks
+        +addTask(Task task) void
+        +getDailyPlan() List~Task~
+    }
+
+    Owner "1" --> "many" Pet : owns
+    Pet "1" --> "1" Owner : belongs to
+    Task "1" --> "1" Owner : associated with
+    Task "1" --> "1" Pet : associated with
+    Scheduler "1" --> "1" Pet : scheduled for
+    Scheduler "1" o-- "many" Task : holds
