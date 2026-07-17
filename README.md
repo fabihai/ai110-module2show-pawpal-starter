@@ -53,6 +53,12 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 #   09:00 — Feeding (10 min) [priority: high]
 #   ...
 ```
+```
+=== Daily Plan for Chazz's Pets ===
+  ○ Feed pet (food) at 10:00 [daily]
+  ○ Take pet for a walk (play) at 12:00 [daily]
+  ○ Give pet meds (medicine) at 16:00 [daily]
+  ```
 
 ## 🧪 Testing PawPal+
 
@@ -72,14 +78,12 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `get_daily_plan()` | Sorts tasks by scheduled time using lambda: `key=lambda t: t.scheduled_time` |
+| Filtering | `get_tasks_by_completion_status()`, `get_tasks_by_pet_name()`, `get_tasks_by_type()`, `get_pending_tasks()` | Filter by completion status (completed/pending), pet name, task type (food/medicine/play), or only incomplete tasks |
+| Conflict handling | `detect_task_conflicts()`, `get_all_scheduling_conflicts()` | Lightweight detection returns warning messages for exact time matches; [CONFLICT] for same-pet overlaps, [ALERT] for different-pet overlaps |
+| Recurring tasks | `complete_task()` | Marks task complete and auto-creates next occurrence for daily/weekly tasks; one-time tasks do not recur |
 
 ## 📸 Demo Walkthrough
 

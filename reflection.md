@@ -33,6 +33,7 @@ User actions:
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+    One of the tradeoffs that my Scheduler makes is that it only checks for exact time matches instead of overlapping durations when checking for scheduling conflicts. Pet tasks do not take very long so it makes more sense to check for the start time match as opposed to checking a block of time. An owner would be able to do multiple tasks within the same hour.
 ---
 
 ## 3. AI Collaboration

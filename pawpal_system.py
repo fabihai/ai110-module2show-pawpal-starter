@@ -23,7 +23,7 @@ class Task:
 
     def __str__(self) -> str:
         """Return a formatted string representation of the task."""
-        status = "✓" if self.is_completed else "○"
+        status = "[X]" if self.is_completed else "[ ]"
         return f"{status} {self.description} ({self.task_type}) at {self.scheduled_time.strftime('%H:%M')} [{self.frequency}]"
 
 
@@ -139,9 +139,123 @@ class Scheduler:
 
         return [t for t in tasks if t.task_type == task_type]
 
+    def get_tasks_by_completion_status(self, is_completed: bool, pet: Optional[Pet] = None) -> List[Task]:
+        """
+        Filter tasks by completion status.
+
+        Args:
+            is_completed: True for completed tasks, False for pending tasks
+            pet: Optional pet to filter by. If None, returns tasks from all pets
+
+        Returns:
+            List of tasks matching the completion status
+        """
+        if pet:
+            tasks = pet.get_tasks()
+        else:
+            tasks = self.owner.get_all_tasks()
+
+        return [t for t in tasks if t.is_completed == is_completed]
+
+    def get_tasks_by_pet_name(self, pet_name: str) -> List[Task]:
+        """
+        Filter tasks by pet name.
+
+        Args:
+            pet_name: Name of the pet to filter by
+
+        Returns:
+            List of tasks for the specified pet, sorted by time
+
+        Raises:
+            ValueError: If pet name not found
+        """
+        pet = next((p for p in self.owner.pets if p.name.lower() == pet_name.lower()), None)
+        if pet is None:
+            raise ValueError(f"Pet '{pet_name}' not found")
+
+        return sorted(pet.get_tasks(), key=lambda t: t.scheduled_time)
+
+    def detect_task_conflicts(self, task: Task) -> List[str]:
+        """
+        Detect scheduling conflicts for a single task against existing tasks.
+        Returns lightweight warning messages (no exceptions).
+
+        Args:
+            task: The task to check for conflicts
+
+        Returns:
+            List of warning messages (empty list if no conflicts)
+        """
+        warnings = []
+        existing_tasks = self.owner.get_all_tasks()
+
+        for existing in existing_tasks:
+            if task is existing:
+                continue
+
+            if task.scheduled_time == existing.scheduled_time:
+                if task.pet == existing.pet:
+                    warnings.append(
+                        f"[CONFLICT] '{task.description}' for {task.pet.name} at "
+                        f"{task.scheduled_time.strftime('%H:%M')} conflicts with "
+                        f"'{existing.description}' (same pet, same time)"
+                    )
+                else:
+                    warnings.append(
+                        f"[ALERT] '{task.description}' ({task.pet.name}) at "
+                        f"{task.scheduled_time.strftime('%H:%M')} overlaps with "
+                        f"'{existing.description}' ({existing.pet.name})"
+                    )
+
+        return warnings
+
+    def get_all_scheduling_conflicts(self) -> List[str]:
+        """
+        Detect all scheduling conflicts across the entire schedule.
+        Returns lightweight warning messages for overlapping tasks.
+
+        Returns:
+            List of all conflict warning messages
+        """
+        warnings = []
+        all_tasks = self.owner.get_all_tasks()
+
+        for i, task in enumerate(all_tasks):
+            for other_task in all_tasks[i + 1:]:
+                if task.scheduled_time == other_task.scheduled_time:
+                    if task.pet == other_task.pet:
+                        warnings.append(
+                            f"[CONFLICT] '{task.description}' and '{other_task.description}' "
+                            f"for {task.pet.name} both at {task.scheduled_time.strftime('%H:%M')}"
+                        )
+                    else:
+                        warnings.append(
+                            f"[ALERT] {task.pet.name} ('{task.description}') and "
+                            f"{other_task.pet.name} ('{other_task.description}') at "
+                            f"{task.scheduled_time.strftime('%H:%M')}"
+                        )
+
+        return warnings
+
     def complete_task(self, task: Task) -> None:
-        """Mark a task as completed."""
+        """
+        Mark a task as completed.
+        For recurring tasks (daily/weekly), automatically create the next occurrence.
+        """
         task.mark_complete()
+
+        if task.frequency in ["daily", "weekly"]:
+            next_task = Task(
+                description=task.description,
+                pet=task.pet,
+                task_type=task.task_type,
+                scheduled_time=task.scheduled_time,
+                frequency=task.frequency,
+                is_completed=False,
+                owner=task.owner
+            )
+            self.add_task(next_task)
 
     def print_daily_plan(self, pet: Optional[Pet] = None) -> None:
         """Print a formatted daily plan."""
